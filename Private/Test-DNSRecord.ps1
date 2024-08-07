@@ -166,6 +166,9 @@ function Test-DNSRecord {
         LifeWire:   https://www.lifewire.com/free-and-public-dns-servers-2626062
 
     .LINK
+        https://www.powershellgallery.com/packages/Test-DNSRecord/1.0.1
+        https://github.com/BanterBoy/Test-DNSRecord
+        https://open.vscode.dev/BanterBoy/Test-DNSRecord
         Resolve-DNSName - https://docs.microsoft.com/en-us/powershell/module/dnsclient/resolve-dnsname
         Where-Object - https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/where-object
     #>
