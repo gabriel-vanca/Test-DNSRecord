@@ -141,11 +141,11 @@ function Resolve-DNS {
 
     param (
         [Parameter(Mandatory = $True,
-            HelpMessage = "Please enter DNS record name to be resolved. Expected format is either a fully qualified domain name (FQDN) or an IP address (IPv4 or IPv6) e.g. example.com or 151.101.0.81",
+            HelpMessage = 'Please enter DNS record name to be resolved. Expected format is either a fully qualified domain name (FQDN) or an IP address (IPv4 or IPv6) e.g. example.com or 151.101.0.81',
             Position = 0,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [Alias('name')]
+        [Alias('name')]
         [string[]] $recordName,
 
         [Parameter(Mandatory = $False,
@@ -153,7 +153,7 @@ function Resolve-DNS {
             Position = 1,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [ValidateNotNullOrEmpty()]
+        [ValidateNotNullOrEmpty()]
         [Microsoft.DnsClient.Commands.RecordType] $Type = 'A',
 
         [Parameter(Mandatory = $False,
@@ -161,81 +161,81 @@ function Resolve-DNS {
             Position = 2,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [Alias('F','AllDnsTypes')]
+        [Alias('F', 'AllDnsTypes')]
         [Switch] $Force,
 
         [Parameter(Mandatory = $False,
-            HelpMessage = "Select the DNS server to perform the DNS query against. This is a tab complete list. Please check the help for more details. Get-Help Resolve-DNS -Parameter DNSProvider",
-            ParameterSetName = "ExternalDNSProvider",
+            HelpMessage = 'Select the DNS server to perform the DNS query against. This is a tab complete list. Please check the help for more details. Get-Help Resolve-DNS -Parameter DNSProvider',
+            ParameterSetName = 'ExternalDNSProvider',
             Position = 3,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [ValidateNotNullOrEmpty()]
-            [ValidateSet([DNS_Server])]
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet([DNS_Server])]
         [string] $DnsProvider = 'Cloudflare',
 
         [Parameter(Mandatory = $False,
             HelpMessage = "Enter name of the method to contact the previously selected DNS provider that you want to use. For example 'IPv4' for unencrypted HTTP method.",
-            ParameterSetName = "ExternalDNSProvider",
+            ParameterSetName = 'ExternalDNSProvider',
             Position = 4,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [ValidateNotNullOrEmpty()]
-            [ValidateSet('IPv4')]
-            [ValidateScriptAttribute({
+        [ValidateNotNullOrEmpty()]
+        [ValidateSet('IPv4')]
+        [ValidateScriptAttribute({
                 return ([DNS_Server]::DNS_SERVERS[$DnsProvider].Keys.Contains($_))
             })]
-            [Alias('Protocol')]
+        [Alias('Protocol')]
         [string] $DnsRequestMethod = 'IPv4',
 
         [Parameter(Mandatory = $False,
             HelpMessage = "Enter name of the specific DNS server partaining to the previously selected DNS provider that you want to use. For example 'Primary', 'Secondary', 'All'",
-            ParameterSetName = "ExternalDNSProvider",
+            ParameterSetName = 'ExternalDNSProvider',
             Position = 5,
-            ValueFromPipeline  = $False,
+            ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [ValidateNotNullOrEmpty()]
-            [ValidateScriptAttribute({
+        [ValidateNotNullOrEmpty()]
+        [ValidateScriptAttribute({
                 return (('All' -eq $_) -or
                         ([DNS_Server]::DNS_SERVERS[$DnsProvider][$DnsRequestMethod].Keys.Contains($_)))
             })]
-            [ArgumentCompletions('All', 'Primary', 'Secondary')]
+        [ArgumentCompletions('All', 'Primary', 'Secondary')]
         [string] $SubProvider = 'Primary',
 
         [Parameter(Mandatory = $False,
-            HelpMessage = "Attempt resolution via all external DNS providers.",
-            ParameterSetName = "AllExternalDNSProvider",
+            HelpMessage = 'Attempt resolution via all external DNS providers.',
+            ParameterSetName = 'AllExternalDNSProvider',
             Position = 3,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
-            [Alias('AllExternal')]
+        [Alias('AllExternal')]
         [Switch] $AllExternalProviders,
 
         [Parameter(Mandatory = $False,
-            HelpMessage = "Attempt all external DNS providers, including DNS servers deemed a possible cyber risk.",
-            ParameterSetName = "AllExternalDNSProvider",
+            HelpMessage = 'Attempt all external DNS providers, including DNS servers deemed a possible cyber risk.',
+            ParameterSetName = 'AllExternalDNSProvider',
             Position = 4,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
         [Switch] $IgnoreCyberRisk,
 
         [Parameter(Mandatory = $False,
-            HelpMessage = "Switch to Internal DNS Server. Automatic detection will be attempted.",
-            ParameterSetName = "InternalDNSProvider",
+            HelpMessage = 'Switch to Internal DNS Server. Automatic detection will be attempted.',
+            ParameterSetName = 'InternalDNSProvider',
             Position = 3,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
         [Switch] $LocalDNS,
 
         [Parameter(Mandatory = $False,
-            HelpMessage = "Skips the hosts file when resolving this query.",
+            HelpMessage = 'Skips the hosts file when resolving this query.',
             Position = 6,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
         [Switch] $NoHostsFile,
 
         [Parameter(Mandatory = $False,
-            HelpMessage = "If multiple DNS servers return the same result, do not remove duplicates or centralise in one line.",
+            HelpMessage = 'If multiple DNS servers return the same result, do not remove duplicates or centralise in one line.',
             Position = 7,
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
@@ -255,129 +255,177 @@ function Resolve-DNS {
         }
 
         static $DNS_SERVERS = ([System.Collections.Hashtable]([ordered]@{
-            Google = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "8.8.8.8"
-                    Secondary                     = "8.8.4.4" }
-                CyberRisk = $False }
-            Cloudflare = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "1.1.1.1"
-                    Secondary                     = "1.0.0.1"
-                    SecurityPrimary               = "1.1.1.2"
-                    SecuritySecondary             = "1.0.0.2"
-                    FamilyPrimary                 = "1.1.1.3"
-                    FamilySecondary               = "1.0.0.3" }
-                CyberRisk = $False }
-            Quad9 = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "9.9.9.9"
-                    Secondary                     = "149.112.112.112" }
-                CyberRisk = $False }
-            AdGuard = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "94.140.14.14"
-                    Secondary                     = "94.140.15.15" }
-                CyberRisk = $False }
-            OpenDNSHome = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "208.67.222.222"
-                    Secondary                     = "208.67.220.220" }
-                CyberRisk = $False }
-            CleanBrowsing = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "185.228.168.9"
-                    Secondary                     = "185.228.169.9" }
-                CyberRisk = $False }
-            AlternateDNS = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "76.76.19.19"
-                    Secondary                     = "76.223.122.150" }
-                CyberRisk = $False }
-            DNSWATCH = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "84.200.69.80"
-                    Secondary                     = "84.200.70.40" }
-                CyberRisk = $False }
-            Comodo = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "8.26.56.26"
-                    Secondary                     = "8.20.247.20" }
-                CyberRisk = $False }
-            CenturyLinkLevel3 = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "205.171.3.66"
-                    Secondary                     = "205.171.202.166" }
-                CyberRisk = $False }
-            SafeDNS = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "195.46.39.39"
-                    Secondary                     = "195.46.39.40" }
-                CyberRisk = $False }
-            OpenNIC = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "172.98.193.42"
-                    Secondary                     = "66.70.228.164" }
-                CyberRisk = $False }
-            Dyn = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "216.146.35.35"
-                    Secondary                     = "216.146.36.36" }
-                CyberRisk = $False }
-            FreeDNS = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "45.33.97.5"
-                    Secondary                     = "37.235.1.177" }
-                CyberRisk = $False }
-            Yandex = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "77.88.8.8"
-                    Secondary                     = "77.88.8.1" }
-                CyberRisk = $True }
-            UncensoredDNS = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "91.239.100.100"
-                    Secondary                     = "89.233.43.71" }
-                CyberRisk = $False }
-            Neustar = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "64.6.64.6"
-                    Secondary                     = "64.6.65.6" }
-                CyberRisk = $False }
-            FourthEstate = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "45.77.165.194"
-                    Secondary                     = "45.32.36.36" }
-                CyberRisk = $False }
-            Gcore = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "2.56.220.2"
-                    Secondary                     = "95.85.95.85" }
-                CyberRisk = $False }
-            DNSFilter = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "103.247.36.36"
-                    Secondary                     = "103.247.37.37" }
-                CyberRisk = $False }
-            CiscoUmbrella = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "208.67.220.220"
-                    Secondary                     = "208.67.222.222" }
-                CyberRisk = $False }
-            Verisign = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "64.6.64.6"
-                    Secondary                     = "64.6.65.6" }
-                CyberRisk = $False }
-            HurricaneElectric = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "74.82.42.42" }
-                CyberRisk = $False }
-            puntCAT = [ordered]@{
-                IPv4 = [ordered]@{
-                    Primary                       = "109.69.8.51" }
-                CyberRisk = $False }
-        }))
+                    Google            = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '8.8.8.8'
+                            Secondary = '8.8.4.4' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Cloudflare        = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary           = '1.1.1.1'
+                            Secondary         = '1.0.0.1'
+                            SecurityPrimary   = '1.1.1.2'
+                            SecuritySecondary = '1.0.0.2'
+                            FamilyPrimary     = '1.1.1.3'
+                            FamilySecondary   = '1.0.0.3' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Quad9             = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '9.9.9.9'
+                            Secondary = '149.112.112.112' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    AdGuard           = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '94.140.14.14'
+                            Secondary = '94.140.15.15' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    OpenDNSHome       = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '208.67.222.222'
+                            Secondary = '208.67.220.220' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    CleanBrowsing     = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '185.228.168.9'
+                            Secondary = '185.228.169.9' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    AlternateDNS      = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '76.76.19.19'
+                            Secondary = '76.223.122.150' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    DNSWATCH          = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '84.200.69.80'
+                            Secondary = '84.200.70.40' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Comodo            = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '8.26.56.26'
+                            Secondary = '8.20.247.20' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    CenturyLinkLevel3 = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '205.171.3.66'
+                            Secondary = '205.171.202.166' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    SafeDNS           = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '195.46.39.39'
+                            Secondary = '195.46.39.40' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    OpenNIC           = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '172.98.193.42'
+                            Secondary = '66.70.228.164' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Dyn               = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '216.146.35.35'
+                            Secondary = '216.146.36.36' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    FreeDNS           = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '45.33.97.5'
+                            Secondary = '37.235.1.177' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Yandex            = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '77.88.8.8'
+                            Secondary = '77.88.8.1' 
+                        }
+                        CyberRisk = $True 
+                    }
+                    UncensoredDNS     = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '91.239.100.100'
+                            Secondary = '89.233.43.71' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Neustar           = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '64.6.64.6'
+                            Secondary = '64.6.65.6' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    FourthEstate      = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '45.77.165.194'
+                            Secondary = '45.32.36.36' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Gcore             = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '2.56.220.2'
+                            Secondary = '95.85.95.85' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    DNSFilter         = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '103.247.36.36'
+                            Secondary = '103.247.37.37' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    CiscoUmbrella     = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '208.67.220.220'
+                            Secondary = '208.67.222.222' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    Verisign          = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary   = '64.6.64.6'
+                            Secondary = '64.6.65.6' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    HurricaneElectric = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary = '74.82.42.42' 
+                        }
+                        CyberRisk = $False 
+                    }
+                    puntCAT           = [ordered]@{
+                        IPv4      = [ordered]@{
+                            Primary = '109.69.8.51' 
+                        }
+                        CyberRisk = $False 
+                    }
+                }))
 
 
         DNS_Server([String]$Id, [String]$Record, [String]$Type) {
@@ -393,10 +441,10 @@ function Resolve-DNS {
 
 
             if ([string]::IsNullOrWhiteSpace($this.Id)) {
-                Write-Verbose -Message "Checking Google Primary..."
+                Write-Verbose -Message 'Checking Google Primary...'
                 $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.DNS_SERVERS.GooglePrimary -ErrorAction Stop
 
-                Write-Verbose -Message "Checking Google Secondary..."
+                Write-Verbose -Message 'Checking Google Secondary...'
                 $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.DNS_SERVERS.GoogleSecondary -ErrorAction Stop
 
                 return $result
@@ -404,7 +452,7 @@ function Resolve-DNS {
 
             switch ($this.Id) {
                 InternalDNSserver {
-                    $internalDNS = (Get-ADDomainController -Filter { Name -like "*" }).HostName
+                    $internalDNS = (Get-ADDomainController -Filter { Name -like '*' }).HostName
 
                     foreach ($PSItem in $internalDNS) {
                         $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $PSItem -DnsOnly -ErrorAction Stop
@@ -434,9 +482,8 @@ function Resolve-DNS {
         try {
             $server = [DNS_Server]::new($DNSProvider, $record, $Type)
             Write-Output $server.Resolve()
-        }
-        catch {
-            Write-Error "An error occurred:"
+        } catch {
+            Write-Error 'An error occurred:'
             Write-Error $_
         }
     }
