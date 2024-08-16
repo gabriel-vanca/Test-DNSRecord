@@ -1,4 +1,4 @@
-using module "./Classes/DNS_SERVER.class.psm1"
+using module './Classes/DNS_SERVER.class.psm1'
 
 Import-Module -Name DnsClient
 
