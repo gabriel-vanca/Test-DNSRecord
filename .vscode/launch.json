@@ -5,10 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PowerShell: Launch Current File",
+            "name": "PowerShell: Launch Current Module",
             "type": "PowerShell",
             "request": "launch",
-            "script": "Import-Module '.\\Resolve-DNS\\Resolve-DNS.psd1' -Force",
+            "script": "Import-Module '.\\Resolve-DNS\\Resolve-DNS.psd1'",
             "cwd": "${workspaceRoot}",
             "args": []
         }

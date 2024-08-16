@@ -183,13 +183,16 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
                 }
             }))
 
+    # GetValidValues() cannot be static and needs to instantiate the class with zero parameters
+    DNS_Server() {
+    }
 
     DNS_Server([String]$Id, [String]$Record, [String]$Type) {
         $this.Id = $Id
         $this.Record = $Record
         $this.Type = $Type
 
-        $this.Ip = $this.DNS_SERVERS[$Id]
+        $this.Ip = [DNS_Server]::DNS_SERVERS[$Id]
     }
 
     [Object[]] Resolve() {
