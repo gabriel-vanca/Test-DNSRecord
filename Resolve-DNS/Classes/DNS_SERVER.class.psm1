@@ -192,24 +192,24 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
         $this.Record = $Record
         $this.Type = $Type
 
-        $this.Ip = [DNS_Server]::DNS_SERVERS[$DNS_Provider_Id].IPv4.Primary
+        if ([string]::IsNullOrWhiteSpace($this.DNS_Provider_Id))
+        {
+            Write-Verbose -Message "Checking Google Primary..."
+            $this.Ip = [DNS_Server]::DNS_SERVERS.Google.IPv4.Primary
+        }
+        else {
+            Write-Verbose -Message "Checking $this.DNS_Provider_Id Primary..."
+            $this.Ip = [DNS_Server]::DNS_SERVERS[$DNS_Provider_Id].IPv4.Primary
+        }
+
     }
 
     [Object[]] Resolve() {
+
         [Object[]]$result = @()
 
-
-        if ([string]::IsNullOrWhiteSpace($this.DNS_Provider_Id)) {
-            Write-Verbose -Message 'Checking Google Primary...'
-            $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.DNS_SERVERS.GooglePrimary -ErrorAction Stop
-
-            Write-Verbose -Message 'Checking Google Secondary...'
-            $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.DNS_SERVERS.GoogleSecondary -ErrorAction Stop
-
-            return $result
-        }
-
         switch ($this.DNS_Provider_Id) {
+
             InternalDNSserver {
                 $internalDNS = (Get-ADDomainController -Filter { Name -like '*' }).HostName
 
@@ -217,8 +217,9 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
                     $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $PSItem -DnsOnly -ErrorAction Stop
                     Write-Verbose -Message "Checking $PSItem..."
                 }
-                return $result
+                break;
             }
+
             DNSZoneNameServers {
                 $query = Resolve-DnsName -Name $this.Record -Type NS | Where-Object NameHost
                 $GlueServers = $query.NameHost
@@ -227,12 +228,16 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
                     $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $PSItem -DnsOnly -ErrorAction Stop
                     Write-Verbose -Message "Checking $PSItem..."
                 }
-                return $result
+                break;
+            }
+
+            default {
+                $result = Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.Ip -DnsOnly -ErrorAction Stop
+                Write-Verbose -Message "Checking $($this.DNS_Provider_Id)..."
+                break;
             }
         }
 
-        $result = Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.Ip -DnsOnly -ErrorAction Stop
-        Write-Verbose -Message "Checking $($this.DNS_Provider_Id)..."
         return $result
     }
 }
