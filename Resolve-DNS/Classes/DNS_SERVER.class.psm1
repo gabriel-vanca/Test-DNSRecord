@@ -1,6 +1,6 @@
 class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
 
-    [String]$Id
+    [String]$DNS_Provider_Id
     [String]$Record
     [String]$Type
 
@@ -187,19 +187,19 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
     DNS_Server() {
     }
 
-    DNS_Server([String]$Id, [String]$Record, [String]$Type) {
-        $this.Id = $Id
+    DNS_Server([String]$DNS_Provider_Id, [String]$Record, [String]$Type) {
+        $this.DNS_Provider_Id = $DNS_Provider_Id
         $this.Record = $Record
         $this.Type = $Type
 
-        $this.Ip = [DNS_Server]::DNS_SERVERS[$Id]
+        $this.Ip = [DNS_Server]::DNS_SERVERS[$DNS_Provider_Id].IPv4.Primary
     }
 
     [Object[]] Resolve() {
         [Object[]]$result = @()
 
 
-        if ([string]::IsNullOrWhiteSpace($this.Id)) {
+        if ([string]::IsNullOrWhiteSpace($this.DNS_Provider_Id)) {
             Write-Verbose -Message 'Checking Google Primary...'
             $result += Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.DNS_SERVERS.GooglePrimary -ErrorAction Stop
 
@@ -209,7 +209,7 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
             return $result
         }
 
-        switch ($this.Id) {
+        switch ($this.DNS_Provider_Id) {
             InternalDNSserver {
                 $internalDNS = (Get-ADDomainController -Filter { Name -like '*' }).HostName
 
@@ -232,7 +232,7 @@ class DNS_Server : System.Management.Automation.IValidateSetValuesGenerator {
         }
 
         $result = Resolve-DnsName -Name $this.Record -Type $this.Type -Server $this.Ip -DnsOnly -ErrorAction Stop
-        Write-Verbose -Message "Checking $($this.Id)..."
+        Write-Verbose -Message "Checking $($this.DNS_Provider_Id)..."
         return $result
     }
 }

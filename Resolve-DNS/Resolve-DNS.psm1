@@ -187,7 +187,7 @@ function Resolve-DNS {
             ValueFromPipelineByPropertyName = $True)]
         [ValidateNotNullOrEmpty()]
         [ValidateSet('IPv4')]
-        [ValidateScriptAttribute({
+        [ValidateScript({
                 return ([DNS_Server]::DNS_SERVERS[$DnsProvider].Keys.Contains($_))
             })]
         [Alias('Protocol')]
@@ -200,7 +200,7 @@ function Resolve-DNS {
             ValueFromPipeline = $False,
             ValueFromPipelineByPropertyName = $True)]
         [ValidateNotNullOrEmpty()]
-        [ValidateScriptAttribute({
+        [ValidateScript({
                 return (('All' -eq $_) -or
                         ([DNS_Server]::DNS_SERVERS[$DnsProvider][$DnsRequestMethod].Keys.Contains($_)))
             })]
@@ -252,11 +252,11 @@ function Resolve-DNS {
             $server = [DNS_Server]::new($DNSProvider, $record, $Type)
             Write-Output $server.Resolve()
         } catch {
-            Write-Error 'An error occurred:'
-            Write-Error $_
+            Write-Error "An error occurred trying to resolve: $record $Type $DNSProvider : $_"
         }
     }
 }
 
-Resolve-DNS google.ro
 
+
+Export-ModuleMember -Function 'Resolve-DNS'

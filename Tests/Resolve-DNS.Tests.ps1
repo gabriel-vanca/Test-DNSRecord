@@ -1,7 +1,11 @@
+# using module '../Resolve-DNS/Resolve-DNS.psd1'
 
+Import-Module -Name '../Resolve-DNS/Resolve-DNS.psd1' 
 
-# Test-DNSRecord -recordName bbc.co.uk -Type A -DNSProvider GooglePrimary
+# Resolve-DNS google.ro
 
-# Test-DNSRecord -recordName bbc.co.uk -Type CNAME -DNSProvider GoogleSecondary
+Resolve-DNS -recordName bbc.co.uk -Type A -DNSProvider Google
 
-# Test-DNSRecord -recordName bbc.co.uk -Type CNAME -DNSProvider Quad9Primary
+# Resolve-DNS -recordName bbc.co.uk -Type CNAME -DNSProvider GoogleSecondary
+
+# Resolve-DNS -recordName bbc.co.uk -Type CNAME -DNSProvider Quad9Primary
